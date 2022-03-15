@@ -70,8 +70,10 @@ void queue_pop(int out_nr){
     if (out_nr > in){
         in = 0;
         printf("UNDERFLOW ");
-    }    
-    in -= out_nr;
+    }
+    else{
+    	in -= out_nr;
+    }
 }
 
 void queue_state(void){
