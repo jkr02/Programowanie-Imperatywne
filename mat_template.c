@@ -60,11 +60,20 @@ void backward_substitution_index(double A[][SIZE], const int indices[], double x
 // (no rows' swaps). If A[i][i] == 0, function returns NAN.
 // Function may change A matrix elements.
 double gauss_simplified(double A[][SIZE], int n){
-    double licznik, wyznacznik=1;
+    double licznik, wyznacznik=1, temp;
     for (int x=n-1; x>0; x--){
-        for (int i=x-1; i>0; i--){
+        for (int i=x-1; i>-1; i--){
             if (A[x][x]==0){
-                continue;
+                for(int k=x-1; k>-1; k--){
+                    if (A[x][k]!=0){
+                        for (int l=n-1; l>-1; l--){
+                            temp = A[l][x];
+                            A[l][k] = A[l][x];
+                            A[l][x] = temp;
+                        }
+                        break;
+                    }
+                }
             }
             licznik=A[x][i]/A[x][x];
             for (int j=x; j>-1; j--){
@@ -85,7 +94,74 @@ double gauss_simplified(double A[][SIZE], int n){
 // If max A[i][i] < eps, function returns 0.
 // If det != 0 && b != NULL && x != NULL then vector x should contain solution of Ax = b.
 
-double gauss(double A[][SIZE], const double b[], double x[], const int n, const double eps){}
+double gauss(double A[][SIZE], const double b[], double x[], const int n, const double eps){
+    double wyznacznik=1, temp, c[n], licznik, pop;
+    int maksimum;
+    for (int i=0; i<n;i++){
+        c[i]=b[i];
+    }
+    for (int i=0; i<n-1; i++){
+                        for (int r=0; r<n; r++){
+        for(int j=0; j<n; j++){
+            printf("%f ", A[r][j]);
+        }
+        printf("\n");
+            }
+            printf("\n");
+        for (int j=i+1; j<n; j++){
+            if (fabs(A[i][i])<fabs(A[j][i])){
+                for (int y=i; y<n;y++){
+                    temp=A[i][y];
+                    A[i][y]=A[j][y];
+                    A[j][y]=temp;
+                }
+                temp = c[i];
+                c[i] = c[j];
+                c[j] = temp;
+            }
+        }
+            for (int r=0; r<n; r++){
+        for(int j=0; j<n; j++){
+            printf("%f ", A[r][j]);
+        }
+        printf("\n");
+            }
+            printf("\n");
+        if (A[i][i]<eps){
+            return wyznacznik=0;
+        }
+        for (int j=i+1; j<n; j++){
+            licznik=A[j][i]/A[i][i];
+            for (int y=i; y<n;y++){
+                A[j][y]-=licznik*A[i][y];
+            }
+        }
+                    for (int r=0; r<n; r++){
+        for(int j=0; j<n; j++){
+            printf("%f ", A[r][j]);
+        }
+        printf("\n");
+            }
+            printf("\n \n");
+    }
+    for (int r=0; r<n; r++){
+        for(int j=0; j<n; j++){
+            printf("%f ", A[r][j]);
+        }
+        printf("\n");
+    }
+    for (int i=0; i<n; i++){
+        wyznacznik*=A[i][i];
+    }
+    pop=0;
+    for (int i=n-1; i>-1; i--){
+        for(int j=n-1; j>i; j--){
+            c[i]-=c[j]*A[i][j];
+        }
+        x[i]=c[i]/A[i][i];
+    }
+    return wyznacznik;
+}
 
 // 5.4
 // Returns the determinant; B contains the inverse of A (if det(A) != 0)
