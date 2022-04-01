@@ -60,20 +60,11 @@ void backward_substitution_index(double A[][SIZE], const int indices[], double x
 // (no rows' swaps). If A[i][i] == 0, function returns NAN.
 // Function may change A matrix elements.
 double gauss_simplified(double A[][SIZE], int n){
-    double licznik, wyznacznik=1, temp;
+    double licznik, wyznacznik=1;
     for (int x=n-1; x>0; x--){
         for (int i=x-1; i>-1; i--){
             if (A[x][x]==0){
-                for(int k=x-1; k>-1; k--){
-                    if (A[x][k]!=0){
-                        for (int l=n-1; l>-1; l--){
-                            temp = A[l][x];
-                            A[l][k] = A[l][x];
-                            A[l][x] = temp;
-                        }
-                        break;
-                    }
-                }
+                return NAN;
             }
             licznik=A[x][i]/A[x][x];
             for (int j=x; j>-1; j--){
@@ -95,8 +86,79 @@ double gauss_simplified(double A[][SIZE], int n){
 // If det != 0 && b != NULL && x != NULL then vector x should contain solution of Ax = b.
 
 double gauss(double A[][SIZE], const double b[], double x[], const int n, const double eps){
-    double wyznacznik=1, temp, c[n], licznik, pop;
-    int maksimum;
+    double wyznacznik=1, dzielnik, c[n];
+    int perm[n], licznik=0;
+    int maksimum, tmp;
+    for(int i=0; i<n; i++){
+    	perm[i]=i;
+    	c[i]=b[i];
+    }
+    for (int j=0; j<n; j++){
+    		for (int k=0; k<n; k++){
+    			printf("%f ", A[perm[j]][k]);
+    		}
+    		printf("  %f", c[perm[j]]);
+    		printf("\n");
+    	}
+    	printf("\n");
+    for(int i=0; i<n-1;i++){
+    	maksimum=perm[i];
+    	for(int j=i+1; j<n; j++){
+    		if(A[maksimum][i] < A[perm[j]][i]){
+    			maksimum=perm[j];
+    		}
+    	}
+	if(perm[maksimum]!=perm[i]){
+		licznik+=1;
+	    	tmp=perm[i];
+	    	perm[i]=perm[maksimum];
+	    	perm[maksimum] = tmp;
+	}
+    	if (A[perm[i]][i] < eps){
+    		return 0;
+    	}
+    	for(int j=i+1; j<n; j++){
+    		dzielnik=A[perm[j]][i]/A[perm[i]][i];
+    		c[perm[j]]-=dzielnik*c[perm[i]];
+    		for(int k=i; k<n; k++){
+    			A[perm[j]][k]-=(A[perm[i]][k]*dzielnik);
+    		}
+    	}for (int j=0; j<n; j++){
+    		for (int k=0; k<n; k++){
+    			printf("%f ", A[perm[j]][k]);
+    		}
+    		printf("  %f", c[perm[j]]);
+    		printf("\n");
+    	}
+    	printf("\n");
+    }
+    for (int i=0; i<n; i++){
+    	wyznacznik*=A[perm[i]][i];
+    }
+    if(licznik % 2==1){
+    	wyznacznik*=(-1);
+    }
+    for (int i=n-1; i>-1; i--){
+    	for(int j=n-1; j>i; j--){
+    		c[perm[i]]-=A[perm[i]][j]*c[perm[j]];
+    	}
+    	c[perm[i]]/=A[perm[i]][i];
+    	x[i]=c[perm[i]];
+    }
+    
+    
+    
+    
+    return wyznacznik;
+    
+    
+    
+    
+    
+    
+    
+    
+    /*
     for (int i=0; i<n;i++){
         c[i]=b[i];
     }
@@ -161,12 +223,37 @@ double gauss(double A[][SIZE], const double b[], double x[], const int n, const 
         x[i]=c[i]/A[i][i];
     }
     return wyznacznik;
+    return 0;
+    */
 }
 
 // 5.4
 // Returns the determinant; B contains the inverse of A (if det(A) != 0)
 // If max A[i][i] < eps, function returns 0.
-double matrix_inv(double A[][SIZE], double B[][SIZE], int n, double eps){}
+double matrix_inv(double A[][SIZE], double B[][SIZE], int n, double eps){
+	double dzielnik;
+	for (int i=0; i<n; i++){
+		B[i][i]=1;
+	}
+	for (int i=0; i<n; i++){
+		for (int j=i; j<n; j++){
+			A[i][j]/=A[i][i];
+		}
+		for (int j=0; j<n; j++){
+			B[i][j]/=A[i][i];
+		}
+		for (int j=i; j<n; j++){
+			dzielnik = A[j][i]/A[i][i];
+			for (int x=i; x<n; x++){
+				A[j][x]-=(dzielnik*A[i][x]);
+			}
+			for (int x=0; x<n; x++){
+				B[j][x]-=(dzielnik*B[i][x]);
+			}
+		}
+	}
+	return 0;
+}
 
 int main(void) {
 
@@ -211,4 +298,3 @@ int main(void) {
 	}
 	return 0;
 }
-
