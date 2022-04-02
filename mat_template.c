@@ -93,19 +93,11 @@ double gauss(double A[][SIZE], const double b[], double x[], const int n, const 
     	perm[i]=i;
     	c[i]=b[i];
     }
-    for (int j=0; j<n; j++){
-    		for (int k=0; k<n; k++){
-    			printf("%f ", A[perm[j]][k]);
-    		}
-    		printf("  %f", c[perm[j]]);
-    		printf("\n");
-    	}
-    	printf("\n");
     for(int i=0; i<n-1;i++){
-    	maksimum=perm[i];
+    	maksimum=i;
     	for(int j=i+1; j<n; j++){
-    		if(A[maksimum][i] < A[perm[j]][i]){
-    			maksimum=perm[j];
+    		if(fabs(A[perm[maksimum]][i]) < fabs(A[perm[j]][i])){
+    			maksimum=j;
     		}
     	}
 	if(perm[maksimum]!=perm[i]){
@@ -114,7 +106,7 @@ double gauss(double A[][SIZE], const double b[], double x[], const int n, const 
 	    	perm[i]=perm[maksimum];
 	    	perm[maksimum] = tmp;
 	}
-    	if (A[perm[i]][i] < eps){
+    	if (fabs(A[perm[i]][i]) < eps){
     		return 0;
     	}
     	for(int j=i+1; j<n; j++){
@@ -123,14 +115,7 @@ double gauss(double A[][SIZE], const double b[], double x[], const int n, const 
     		for(int k=i; k<n; k++){
     			A[perm[j]][k]-=(A[perm[i]][k]*dzielnik);
     		}
-    	}for (int j=0; j<n; j++){
-    		for (int k=0; k<n; k++){
-    			printf("%f ", A[perm[j]][k]);
-    		}
-    		printf("  %f", c[perm[j]]);
-    		printf("\n");
     	}
-    	printf("\n");
     }
     for (int i=0; i<n; i++){
     	wyznacznik*=A[perm[i]][i];
@@ -145,114 +130,85 @@ double gauss(double A[][SIZE], const double b[], double x[], const int n, const 
     	c[perm[i]]/=A[perm[i]][i];
     	x[i]=c[perm[i]];
     }
-    
-    
-    
-    
     return wyznacznik;
-    
-    
-    
-    
-    
-    
-    
-    
-    /*
-    for (int i=0; i<n;i++){
-        c[i]=b[i];
-    }
-    for (int i=0; i<n-1; i++){
-                        for (int r=0; r<n; r++){
-        for(int j=0; j<n; j++){
-            printf("%f ", A[r][j]);
-        }
-        printf("\n");
-            }
-            printf("\n");
-        for (int j=i+1; j<n; j++){
-            if (fabs(A[i][i])<fabs(A[j][i])){
-                for (int y=i; y<n;y++){
-                    temp=A[i][y];
-                    A[i][y]=A[j][y];
-                    A[j][y]=temp;
-                }
-                temp = c[i];
-                c[i] = c[j];
-                c[j] = temp;
-            }
-        }
-            for (int r=0; r<n; r++){
-        for(int j=0; j<n; j++){
-            printf("%f ", A[r][j]);
-        }
-        printf("\n");
-            }
-            printf("\n");
-        if (A[i][i]<eps){
-            return wyznacznik=0;
-        }
-        for (int j=i+1; j<n; j++){
-            licznik=A[j][i]/A[i][i];
-            for (int y=i; y<n;y++){
-                A[j][y]-=licznik*A[i][y];
-            }
-        }
-                    for (int r=0; r<n; r++){
-        for(int j=0; j<n; j++){
-            printf("%f ", A[r][j]);
-        }
-        printf("\n");
-            }
-            printf("\n \n");
-    }
-    for (int r=0; r<n; r++){
-        for(int j=0; j<n; j++){
-            printf("%f ", A[r][j]);
-        }
-        printf("\n");
-    }
-    for (int i=0; i<n; i++){
-        wyznacznik*=A[i][i];
-    }
-    pop=0;
-    for (int i=n-1; i>-1; i--){
-        for(int j=n-1; j>i; j--){
-            c[i]-=c[j]*A[i][j];
-        }
-        x[i]=c[i]/A[i][i];
-    }
-    return wyznacznik;
-    return 0;
-    */
 }
 
 // 5.4
 // Returns the determinant; B contains the inverse of A (if det(A) != 0)
 // If max A[i][i] < eps, function returns 0.
 double matrix_inv(double A[][SIZE], double B[][SIZE], int n, double eps){
-	double dzielnik;
-	for (int i=0; i<n; i++){
-		B[i][i]=1;
-	}
-	for (int i=0; i<n; i++){
-		for (int j=i; j<n; j++){
-			A[i][j]/=A[i][i];
-		}
-		for (int j=0; j<n; j++){
-			B[i][j]/=A[i][i];
-		}
-		for (int j=i; j<n; j++){
-			dzielnik = A[j][i]/A[i][i];
-			for (int x=i; x<n; x++){
-				A[j][x]-=(dzielnik*A[i][x]);
-			}
-			for (int x=0; x<n; x++){
-				B[j][x]-=(dzielnik*B[i][x]);
-			}
-		}
-	}
-	return 0;
+    double wyznacznik=1, dzielnik, temp;
+    int perm[n], licznik=0;
+    int maksimum, tmp;
+    for(int i=0; i<n; i++){
+    	perm[i]=i;
+    	B[i][i]=1;
+    }
+    for(int i=0; i<n-1;i++){
+    	maksimum=i;
+    	for(int j=i+1; j<n; j++){
+    		if(fabs(A[perm[maksimum]][i]) < fabs(A[perm[j]][i])){
+    			maksimum=j;
+    		}
+    	}
+        if(perm[maksimum]!=perm[i]){
+            licznik+=1;
+            tmp=perm[i];
+            perm[i]=perm[maksimum];
+            perm[maksimum] = tmp;
+        }
+    	if (fabs(A[perm[i]][i]) < eps){
+    		return 0;
+    	}
+    	for(int j=i+1; j<n; j++){
+    		dzielnik=A[perm[j]][i]/A[perm[i]][i];
+    		for(int k=i; k<n; k++){
+    			A[perm[j]][k]-=(A[perm[i]][k]*dzielnik);
+    		}
+    		for(int k=0; k<n; k++){
+                B[perm[j]][k]-=(B[perm[i]][k]*dzielnik);
+    		}
+    	}
+    }
+    for (int i=0; i<n; i++){
+    	wyznacznik*=A[perm[i]][i];
+    }
+    if(licznik % 2==1){
+    	wyznacznik*=(-1);
+    }
+    for (int i=n-1; i>-1; i--){
+        for (int j=n-1; j>i; j--){
+            dzielnik=A[perm[i]][j];
+            A[perm[i]][j]-=dzielnik*A[perm[j]][j];
+            for (int k=0; k<n; k++){
+                B[perm[i]][k]-=B[perm[j]][k]*dzielnik;
+            }
+        }
+        dzielnik=A[perm[i]][i];
+        A[perm[i]][i]=1;
+        for (int j=0; j<n; j++){
+            B[perm[i]][j]/=dzielnik;
+        }
+    }
+    for(int i=0; i<n; i++){
+        for (int j=i+1; j<n; j++){
+            if (perm[j] == i){
+                for (int k=0; k<n; k++){
+                    temp=B[perm[j]][k];
+                    B[perm[j]][k]=B[perm[i]][k];
+                    B[perm[i]][k]=temp;
+                }
+                tmp=perm[j];
+                perm[j]=perm[i];
+                perm[i]=tmp;
+                break;
+            }
+        }
+    }
+    return wyznacznik;
+
+
+
 }
 
 int main(void) {
