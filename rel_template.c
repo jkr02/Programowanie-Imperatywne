@@ -11,26 +11,119 @@ typedef struct {
 } pair;
 
 // Add pair to existing relation if not already there
-int add_relation (pair*, int, pair);
+int add_to_relation (pair* struktura, int size, pair para){
+    for (int i=0; i<size; i++){
+        if (struktura[i].first==para.first && struktura[i].second==para.second){
+            return 0;
+        }
+    }
+    return 1;
+};
 
 // Case 1:
 // The relation R is reflexive if xRx for every x in X
-int is_reflexive(pair*, int);
+int is_reflexive(pair* struktura, int size){
+    for (int i=0; i<size; i++){
+        if (struktura[i].first!=struktura[i].second){
+            return 0;
+        }
+    }
+    return 1;
+}
 // The relation R on the set X is called irreflexive
 // if xRx is false for every x in X
-int is_irreflexive(pair*, int);
+int is_irreflexive(pair* struktura, int size){
+    for (int i=0; i<size; i++){
+        if (struktura[i].first==struktura[i].second){
+            return 0;
+        }
+    }
+    return 1;
+}
 // A binary relation R over a set X is symmetric if:
 // for all x, y in X xRy <=> yRx
-int is_symmetric(pair*, int);
+int is_symmetric(pair* struktura, int size){
+    int flag;
+    for (int i=0; i<size; i++){
+        flag=0;
+        for (int j=0; j<size; j++){
+            if (i!=j){
+                if (struktura[i].second==struktura[j].first && struktura[i].first==struktura[j].second){
+                    flag=1;
+                }
+                else if (struktura[i].second==struktura[j].first){
+                    return 0;
+                }
+            }
+        }
+        if (flag==0){
+            return 0;
+        }
+    }
+    return 1;
+}
 // A binary relation R over a set X is antisymmetric if:
 // for all x,y in X if xRy and yRx then x=y
-int is_antisymmetric(pair*, int);
+int is_antisymmetric(pair* struktura, int size){
+    int flag;
+    for (int i=0; i<size; i++){
+        flag=0;
+        for (int j=0; j<size; j++){
+            if (i!=j){
+                if (struktura[i].second==struktura[j].first && struktura[i].first==struktura[j].second && struktura[i].first==struktura[i].second){
+                    flag=1;
+                }
+                else if (struktura[i].second==struktura[j].first){
+                    return 0;
+                }
+            }
+        }
+        if (flag==0){
+            return 0;
+        }
+    }
+    return 1;
+}
 // A binary relation R over a set X is asymmetric if:
 // for all x,y in X if at least one of xRy and yRx is false
-int is_asymmetric(pair*, int);
+int is_asymmetric(pair* struktura, int size){
+    int flag;
+    for (int i=0; i<size; i++){
+        flag=0;
+        for (int j=0; j<size; j++){
+            if (i!=j){
+                if (struktura[i].second==struktura[j].first && struktura[i].first==struktura[j].second){
+                    return 0;
+                }
+            }
+        }
+    }
+    return 1;
+}
 // A homogeneous relation R on the set X is a transitive relation if:
 // for all x, y, z in X, if xRy and yRz, then xRz
-int is_transitive(pair*, int);
+int is_transitive(pair* struktura, int size){
+    int flag;
+    for (int i=0; i<size; i++){
+        for (int j=0; j<size; j++){
+            if (i!=j){
+                if (struktura[i].second==struktura[j].first){
+                    flag=0;
+                    for (int k=0; k<size; k++){
+                        if (struktura[i].first==struktura[k].first && struktura[j].second==struktura[k].second){
+                            flag=1;
+                            break;
+                        }
+                    }
+                    if (flag==0){
+                        return 0;
+                    }
+                }
+            }
+        }
+    }
+    return 1;
+}
 
 // Case 2:
 // A partial order relation is a homogeneous relation that is
@@ -54,7 +147,20 @@ int cmp (pair p1, pair p2) {
 }
 
 // Read number of pairs, n, and then n pairs of ints
-int read_relation(pair*);
+int read_relation(pair* struktura){
+    int size, indeks=0;
+    pair para;
+    scanf("%lf", &size);
+    for (int i=0; i<size; i++){
+        scanf("%d", &para.first);
+        scanf("%d", &para.second);
+        if (add_to_relation(struktura, indeks, para)){
+            struktura[indeks] = para;
+            indeks++;
+        }
+    }
+    return indeks;
+}
 
 void print_int_array(int *array, int n) {
 	printf("%d\n", n);
