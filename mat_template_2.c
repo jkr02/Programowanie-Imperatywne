@@ -6,23 +6,21 @@
 #define TAB_SIZE  1000
 #define BUF_SIZE  1000
 
-double* get(int cols, int row, int col, const double *A[]){
-    return &A[cols*row+col];
+double get(int cols, int row, int col, const double *A){
+    return *(A + cols*row+col);
 }
 
-void set(int cols, int row, int col, double *A[], double value){
-    A[cols*row+col]=(int)value;
+void set(int cols, int row, int col, double *A, double value){
+    *(A + cols*row+col)=value;
 }
 
-void prod_mat(int rowsA, int colsA, int colsB, double *A[], double *B[], double *AB[]){
-    int suma=0, a, b;
+void prod_mat(int rowsA, int colsA, int colsB, double *A, double *B, double *AB){
+    double suma=0;
     for (int i=0; i<rowsA; i++){
         for (int j=0; j<colsB; j++){
             suma=0;
             for (int k=0; k<colsA; k++){
-                a = A[colsA*i+k];
-                b = B[colsB*k+j];
-                suma+=a*b;
+                suma+=get(colsA, i, k, A)*get(colsB, k, j, B);
             }
             set(colsB, i, j, AB, suma);
         }
@@ -32,7 +30,7 @@ void prod_mat(int rowsA, int colsA, int colsB, double *A[], double *B[], double 
 void read_mat(int rows, int cols, double *t){
     for (int i=0; i<rows; i++){
         for (int j=0; j<cols; j++){
-            scanf("%d", &t[i*cols+j]);
+            scanf("%lf", &t[i*cols+j]);
         }
     }
 }
@@ -40,7 +38,7 @@ void read_mat(int rows, int cols, double *t){
 void print_mat(int rows, int cols, double *t[]){
     for (int i=0; i<rows; i++){
         for (int j=0; j<cols; j++){
-            printf("%d ", t[cols*i+j]);
+            printf("%.2lf ", t[cols*i+j]);
         }
         printf("\n");
     }
