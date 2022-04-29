@@ -35,10 +35,10 @@ void read_mat(int rows, int cols, double *t){
     }
 }
 
-void print_mat(int rows, int cols, double *t[]){
+void print_mat(int rows, int cols, double *t){
     for (int i=0; i<rows; i++){
         for (int j=0; j<cols; j++){
-            printf("%.2lf ", t[cols*i+j]);
+            printf("%.2lf ", get(cols, i, j, t));
         }
         printf("\n");
     }
@@ -50,9 +50,33 @@ void write_char_line(char *tab[], int n){}
 
 void delete_lines(char *tab[], int line_count){}
 
-int read_dbl_lines_v1(double *ptr_tab[]){return 0;}
+int read_dbl_lines_v1(double *ptr_tab[]){
+    char line[BUF_SIZE];
+    char *ptr, *poczatek;
+    int licznik=0, first=1, n=0;
+    double liczba;
+    while (fgets(line, BUF_SIZE, stdin)){
+        poczatek=line;
+        while (1){
+            liczba=strtod(poczatek, &ptr);
+            if (poczatek==ptr){
+                break;
+            }
+            ptr_tab[0][licznik]=liczba;
+            licznik++;
+            poczatek=ptr;
+        }
+        n++;
+        ptr_tab[n]=licznik;
+    }
+    return n;
+}
 
-void write_dbl_line_v1(double *ptr_tab[], int n){}
+void write_dbl_line_v1(double *ptr_tab[], int n){
+    for (int i=ptr_tab[n]; i<ptr_tab[n+1]; i++){
+        printf("%lf ", ptr_tab[0][i]);
+    }
+}
 
 int main(void) {
 	int to_do;
