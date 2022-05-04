@@ -44,11 +44,38 @@ void print_mat(int rows, int cols, double *t){
     }
 }
 
-int read_char_lines(char *tab[]){return 0;}
+int read_char_lines(char *tab[]){
+    int n=-1, i=-1;
+    char znak=0, line[BUF_SIZE];
+    while ((znak=fgetc(stdin))!=EOF){
+        if (znak==10){
+            tab[n]=(char*)malloc((i+1)*sizeof(char));
+            for (int x=0; x<i; x++){
+                tab[n][x]=line[x];
+            }
+            tab[n][i]=10;
+            i=-1;
+            n++;
+        }
+        line[i]=znak;
+        i++;
+    }
+    return n;
+}
 
-void write_char_line(char *tab[], int n){}
+void write_char_line(char *tab[], int n){
+    int x=0;
+    while (tab[n-1][x]!=10){
+        printf("%c", tab[n-1][x]);
+        x++;
+    }
+}
 
-void delete_lines(char *tab[], int line_count){}
+void delete_lines(char *tab[], int line_count){
+    for (int i=0; i<line_count; i++){
+        free(tab[i]);
+    }
+}
 
 int read_dbl_lines_v1(double *ptr_tab[]){
     char line[BUF_SIZE];
@@ -74,7 +101,7 @@ int read_dbl_lines_v1(double *ptr_tab[]){
 
 void write_dbl_line_v1(double *ptr_tab[], int n){
     for (int i=ptr_tab[n]; i<ptr_tab[n+1]; i++){
-        printf("%lf ", ptr_tab[0][i]);
+        printf("%.2lf ", ptr_tab[0][i]);
     }
 }
 
