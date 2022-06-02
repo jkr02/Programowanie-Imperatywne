@@ -45,11 +45,11 @@ void init_list(List *p_list, ConstDataFp dump_data, DataFp free_data, CompareDat
 // Print all elements of the list
 void dump_list(const List* p_list) {
 	ListElement *ptr=(ListElement*)p_list->head;
-	while (ptr!=NULL)
+	while (ptr)
 	{
 		p_list->dump_data(ptr);
 		ptr=ptr->next;
-	}	
+	}
 }
 
 // Print elements of the list if comparable to data
@@ -113,7 +113,7 @@ void pop_front(List *p_list) {
 	{
 		ListElement *ptr=(ListElement*)p_list->head;
 		p_list->head=ptr->next;
-		if (p_list->head=NULL)
+		if (p_list->head==NULL)
 		{
 			p_list->tail=NULL;
 		}
@@ -269,13 +269,12 @@ typedef struct DataWord {
 
 void dump_word (const void *d) {
 	DataWord *ptr = (DataWord*)((ListElement*)d)->data;
-	printf("%s ", ptr->word);
+	printf("%s\n", ptr->word);
 }
 
 void dump_word_lowercase (const void *d) {
-	DataWord *ptr = (DataWord*)((ListElement*)d)->data;
-	//tolower(ptr->word);
-	printf("%s ", ptr->word);
+	ListElement *ptr = (ListElement*)d;
+	printf("%s\n", ((DataWord*)ptr->data)->word);
 }
 
 void free_word(void *d) {
@@ -285,20 +284,131 @@ void free_word(void *d) {
 
 // conpare words case insensitive
 int cmp_word_alphabet(const void *a, const void *b) {
+	DataWord *p=(DataWord*)((ListElement*)a)->data;
+	DataWord *q=(DataWord*)((ListElement*)b)->data;
+	printf("  %s  ", p->word);
+	printf("  %s  ", q->word);
+	char *pw = p->word, *qw= q->word;
+	for(; *pw & *qw; pw++, qw++)
+	{
+		if (tolower(*pw)<tolower(*qw))
+		{
+			return 1;
+		}
+		else if (tolower(*pw)>tolower(*qw))
+		{
+			return -1;
+		}
+	}
+	if (!*pw && !*qw)
+		{
+			return 0;
+		}
+		else if (!*pw)
+		{
+			return 1;
+		}
+		else if (!*qw)
+		{
+			return -1;
+		}
+	
+	// int lens=sizeof(p->word)/sizeof(char);
+	// int lent=sizeof(q->word)/sizeof(char);
+	// if (lens<=lent)
+	// {
+	// 	for (size_t i = 0; i < lens; i++)
+	// 	{
+	// 		if (tolower(p->word[i])<tolower(q->word[i]))
+	// 		{
+	// 			return 1;
+	// 		}
+	// 		else if (tolower(p->word[i])>tolower(q->word[i]))
+	// 		{
+	// 			return -1;
+	// 		}
+	// 	}
+	// 	if (lens==lent)
+	// 	{
+	// 		return 0;
+	// 	}
+	// 	return 1;
+	// }
+	// else
+	// {
+	// 	for (size_t i = 0; i < lent; i++)
+	// 	{
+	// 		if (tolower(p->word[i])<tolower(q->word[i]))
+	// 		{
+	// 			return 1;
+	// 		}
+	// 		else if (tolower(p->word[i])>tolower(q->word[i]))
+	// 		{
+	// 			return -1;
+	// 		}
+	// 	}
+	// 	return -1;
+	// }
 }
 
 int cmp_word_counter(const void *a, const void *b) {
+	DataWord *p=(DataWord*)((ListElement*)a)->data;
+	DataWord *q=(DataWord*)((ListElement*)q)->data;
+	return p->counter-q->counter;
 }
 
 // insert element; if present increase counter
 void insert_elem_counter(List *p_list, void *data) {
+	ListElement *ptr=(ListElement*)p_list->head;
+	ListElement *new=malloc(sizeof(ListElement));
+	new->data=data;
+	new->next=NULL;
+	ListElement *inser=find_insertion_point(p_list, new);
+	if (!inser)
+	{
+		push_back(p_list, new);
+	}
+	else if (p_list->compare_data(inser->data, new->data)==0)
+	{
+		DataWord *tmp=(DataWord*)(inser->data);
+		tmp->counter++;
+	}
+	else
+	{
+		push_after(p_list, data, inser);
+	}
+	free(new);
 }
 
 // read text, parse it to words, and insert those words to the list
 // in order given by the last parameter (0 - read order,
 // 1 - alphabetical order)
 void stream_to_list(List *p_list, FILE *stream, int order) {
-
+	char tab[BUFFER_SIZE];
+	char korektor[]=" .,?!:;-\r\n\t";
+	char *schowek;
+	while(fgets(tab, BUFFER_SIZE, stream))
+	{
+		schowek = strtok(tab, korektor);
+		while (schowek!=NULL)
+		{
+			if (order==0)
+			{
+				DataWord *new = malloc(sizeof(DataWord));
+				new->word=strdup(schowek);
+				new->counter=1;
+				push_back(p_list, new);
+			}
+			else if (order==1)
+			{
+				DataWord *new = malloc(sizeof(DataWord));
+				new->word=strdup(schowek);
+				new->counter=1;
+				insert_elem_counter(p_list, new);
+			}
+			schowek = strtok(NULL, korektor);
+		}
+	}
 }
 
 // test integer list
@@ -330,8 +440,6 @@ void list_test(List *p_list, int n) {
 				printf("No such operation: %s\n", op);
 				break;
 		}
-		dump_list(p_list);
-		printf("\n");
 	}
 }
 
