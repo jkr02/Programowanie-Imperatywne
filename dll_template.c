@@ -84,7 +84,7 @@ void skip_forward(iterator* itr, int n) {
 		ptr=ptr->next;
 	}
 	itr->node_ptr=ptr;
-	itr->position=n-d-1;
+	itr->position=n-d;
 }
 
 // forward iteration - get n-th element in the list
@@ -92,8 +92,8 @@ int get_forward(List *list, int n) {
 	iterator *i = malloc(sizeof(iterator));
 	i->node_ptr=list->head;
 	skip_forward(i, n);
-	int p = ((int*)((Node*)i->node_ptr)->data)[i->position];
-	free(i);
+	int p = ((int*)((Node*)i->node_ptr)->data)[i->position-1];
+	//free(i);
 	return p;
 }
 
@@ -125,47 +125,35 @@ void remove_at(List *list, int n) {
 	iterator *i = malloc(sizeof(iterator));
 	i->node_ptr=list->head;
 	skip_forward(i, n);
-	if (i->position==1)
+	for (int j = i->position-1; j < i->node_ptr->array_size-1; j++)
 	{
-		if (i->node_ptr->array_size<=1)
+		i->node_ptr->data[j]=i->node_ptr->data[j+1];
+	}
+	i->node_ptr->array_size--;
+	if (i->node_ptr->array_size==0)
+	{
+		if (list->head==i->node_ptr)
 		{
-			if (!i->node_ptr->prev)
-			{
-				list->head=i->node_ptr->next;	
-			}
-			else if (!i->node_ptr->next)
-			{
-				Node *pop=(Node*)i->node_ptr->prev;
-				pop->next=NULL;
-				list->tail=pop;
-			}
-			else
-			{
-				Node *pop=(Node*)i->node_ptr->prev;
-				Node *nast=(Node*)i->node_ptr->next;
-				pop->next=nast;
-				nast->prev=pop;
-			}
+			list->head=i->node_ptr->next;
+			free(i->node_ptr);
+		}
+		else if (list->tail==i->node_ptr)
+		{
+			Node *ptr = (Node*) i->node_ptr->prev;
+			ptr->next=NULL;
+			list->tail=ptr;
+			free(i->node_ptr);
 		}
 		else
 		{
-			i->node_ptr->data=i->node_ptr->data+sizeof(int);
-			i->node_ptr->array_size--;
+			Node *l = (Node*) i->node_ptr->prev;
+			Node *r=(Node*)i->node_ptr->next;
+			l->next=r;
+			r->prev=l;
+			free(i->node_ptr);
 		}
+		list->size--;
 	}
-	else if (i->position==i->node_ptr->array_size)
-	{
-		i->node_ptr->array_size--;
-	}
-	else
-	{
-		for (int j = i->position-1; j < i->node_ptr->array_size-1; j++)
-		{
-			i->node_ptr->data[j]=i->node_ptr->data[j+1];
-		}
-		i->node_ptr->array_size--;
-	}
-	list->size--;
 }
 
 // -------------------- helper functions
