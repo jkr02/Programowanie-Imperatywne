@@ -46,8 +46,8 @@ void init_ht(hash_table *p_table, int size, DataFp dump_data, DataFp free_data,
     p_table->dump_data = dump_data;
     p_table->free_data = free_data;
     p_table->compare_data = compare_data;
-    p_table->modify_data = modify_data;
     p_table->hash_function = hash_function;
+    p_table->modify_data = modify_data;
     p_table->no_elements = 0;
     p_table->ht = malloc(size * sizeof(ht_element*));
 }
@@ -71,13 +71,13 @@ void free_element(DataFp free_data, ht_element *to_delete) {
 
 // free all elements from the table (and the table itself)
 void free_table(hash_table* p_table) {
-    ht_element *p, *q;
+    ht_element *a, *b;
     for(int i=0; i<p_table->size; i++){
-        p=p_table->ht[i];
-        while(p) {
-            q = p->next;
-            free_element(p_table->free_data, p);
-            p = q;
+        a=p_table->ht[i];
+        while(a) {
+            b = a->next;
+            free_element(p_table->free_data, a);
+            a = b;
         }
     }
     free(p_table->ht);
@@ -91,21 +91,21 @@ int hash_base(int k, int size) {
 }
 
 void rehash(hash_table *p_table) {
-    int old_size = p_table->size, new_hash;
-    ht_element **table_copy = malloc(old_size * sizeof(ht_element*));
-    memcpy(table_copy, p_table->ht, (size_t)old_size * sizeof(ht_element*));
+    int old = p_table->size, hash;
+    ht_element **table_copy = malloc(old * sizeof(ht_element*));
     p_table->size *= 2;
+    memcpy(table_copy, p_table->ht, (size_t)old * sizeof(ht_element*));
     p_table->ht = realloc(p_table->ht, (size_t)p_table->size * sizeof(ht_element*));
     memset(p_table->ht, 0, (size_t)p_table->size * sizeof(ht_element*));
-    ht_element *p, *q;
-    for(int i=0; i < old_size; i++){
-        p = table_copy[i];
-        while(p){
-            q = p->next;
-            new_hash = p_table->hash_function(p->data, p_table->size);
-            p->next = p_table->ht[new_hash];
-            p_table->ht[new_hash] = p;
-            p = q;
+    ht_element *a, *b;
+    for(int i=0; i < old; i++){
+        a = table_copy[i];
+        while(a){
+            b = a->next;
+            hash = p_table->hash_function(a->data, p_table->size);
+            a->next = p_table->ht[hash];
+            p_table->ht[hash] = a;
+            a = b;
         }
     }
     free(table_copy);
@@ -114,10 +114,15 @@ void rehash(hash_table *p_table) {
 // find element; return pointer to previous
 ht_element *find_previous(hash_table *p_table, data_union data, int *first) {
     ht_element *ptr = p_table->ht[*first];
-    if(!ptr) return NULL;
-    while(ptr->next && p_table->compare_data(ptr->next->data, data) != 0)
+    if(!ptr){
+        return NULL;
+    }
+    while(ptr->next && p_table->compare_data(ptr->next->data, data) != 0){
         ptr = ptr->next;
-    if (ptr->next) return ptr;
+    }
+    if (ptr->next){
+        return ptr;
+    }
     return NULL;
 }
 
@@ -125,9 +130,12 @@ ht_element *find_previous(hash_table *p_table, data_union data, int *first) {
 ht_element *get_element(hash_table *p_table, data_union *data) {
     int hash_val = p_table->hash_function(*data, p_table->size);
     ht_element *ptr = p_table->ht[hash_val];
-    while(ptr && p_table->compare_data(ptr->data, *data) != 0)
+    while(ptr && p_table->compare_data(ptr->data, *data) != 0){
         ptr = ptr->next;
-    if(ptr) return ptr;
+    }
+    if(ptr){
+        return ptr;
+    }
     return NULL;
 }
 
@@ -242,9 +250,9 @@ int cmp_word(data_union a, data_union b) {
 int hash_word(data_union data, int size) {
 	int s = 0;
 	DataWord *dw = (DataWord*)data.ptr_data;
-	char *p = dw->word;
-	while (*p) {
-		s += *p++;
+	char *a = dw->word;
+	while (*a) {
+		s += *a++;
 	}
 	return hash_base(s, size);
 }
@@ -260,9 +268,9 @@ data_union create_data_word(char *value) {
     DataWord *dw = malloc(sizeof(DataWord));
     dw->word = strdup(value);
     dw->counter = 1;
-    data_union new_union;
-    new_union.ptr_data = dw;
-    return new_union;
+    data_union new;
+    new.ptr_data = dw;
+    return new;
 }
 
 // read text, parse it to words, and insert those words to the hashtable
@@ -271,19 +279,24 @@ void stream_to_ht(hash_table *p_table, FILE *stream) {
     char corrector[] = ".,?!:;-\n\t\r ";
     char *stash;
     int n;
-    data_union new_data;
     ht_element *ptr;
+    data_union new_data;
     while(fgets(BUFF, BUFFER_SIZE, stream)){
         stash = strtok(BUFF, corrector);
         while(stash != NULL )
         {
             n = (int)strlen(stash);
-            for(int i=0; i<n; i++)
+            for(int i=0; i<n; i++){
                 stash[i] = (char)tolower(stash[i]);
+            }
             new_data = create_data_word(stash);
             ptr = get_element(p_table, &new_data);
-            if(ptr) modify_word(&ptr->data);
-            else insert_element(p_table, &new_data);
+            if(ptr){
+                modify_word(&ptr->data);
+            }
+            else{
+                insert_element(p_table, &new_data);
+            }
             stash = strtok(NULL, corrector);
         }
     }
